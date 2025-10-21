@@ -1,36 +1,93 @@
+use std::cmp;
+use std::sync::Arc;
 use std::fs;
 use std::io::{Write, Result};
 use std::time::{Instant, Duration};
+use std::sync::mpsc;
+use std::thread;
+
+use ibig::UBig;
 
 pub mod naive;
+pub mod linear;
 
-fn measure_universal(name: &str, alg: &dyn Fn(u64) -> u64) -> Result<()> {
-    let mut i: u64 = 0;
-    let max_time = Duration::from_secs(1);
+const MAX_TIME_IN_SEC: u64 = 1;
+const NUMB_OF_POINTS: u64 = 400;
+const LIMIT_FINDING_STEP: u64 = 8192;
+
+fn find_limit(alg: Arc<dyn Fn(u64) + Send + Sync + 'static>) -> u64 {
+    let mut last_idx = 0u64;
+    let mut current_idx = 0u64;
+    let mut step = LIMIT_FINDING_STEP;
+    let limit = Duration::from_millis(MAX_TIME_IN_SEC*1000+100);
+
+    loop {
+        let (tx, rx) = mpsc::channel();
+
+        let f = Arc::clone(&alg);
+        thread::spawn(move || {
+            f(current_idx);
+            let _ = tx.send(current_idx);
+        });
+
+        match rx.recv_timeout(limit) {
+            Ok(_) => {
+                last_idx = current_idx;
+            }
+            Err(_) => {
+                step /= 2;
+                current_idx = last_idx;
+            }
+        }
+        if step == 0 {
+            return current_idx;
+        }
+        current_idx += step;
+    }
+}
+
+fn measure_universal(name: &str, alg: &dyn Fn(u64) -> UBig, max_idx: u64) -> Result<()> {
+    let limit = Duration::from_secs(MAX_TIME_IN_SEC);
     fs::create_dir_all("data/")?;
     let mut file =  fs::File::create(format!("data/{}.out", name))?; 
+
+    let step = cmp::max(1, max_idx / NUMB_OF_POINTS);
+
+    let mut i = 0u64; 
     loop {
         let begin = Instant::now();
-        let num = alg(i);
+        let _ = alg(i);
         let duration = begin.elapsed();
-        let line = format!("{} {} {}", i, num, duration.as_nanos());
-        writeln!(file, "{}", line)?;
-        if duration >= max_time {
+        if duration >= limit {
             break;
         }
-        i += 1;    
+        else {
+            let line = format!("{} {} {}", i, 0, duration.as_nanos());
+            writeln!(file, "{}", line)?;
+        }
+        if i == max_idx {
+            break;
+        }
+        i = cmp::min(i+step, max_idx);
+    
     }
     Ok(())
 }
 
 fn main() -> Result<()> {
+    let f = Arc::new(|x| naive::naive_algorithm_limit(x));
+    let lim_naive = find_limit(f);
+
+    let f = Arc::new(|x| linear::linear_algorithm_limit(x));
+    let lim_linear = find_limit(f);
+    
     let algorithms = vec![
-        ("naive", &naive::naive_algorithm)
-    ];
-    // measure_universal("naive", &naive::naive_algorithm)?;
+        ("naive", lim_naive, &(naive::naive_algorithm as fn(u64) -> UBig)),
+        ("linear", lim_linear, &(linear::linear_algorithm as fn(u64) -> UBig))
+        ];
 
     for alg in algorithms {
-        measure_universal(alg.0, alg.1)?;
+        measure_universal(alg.0, alg.2, alg.1)?;
     }
     Ok(())
 }
