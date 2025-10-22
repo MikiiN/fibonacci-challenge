@@ -1,7 +1,7 @@
 use ibig::UBig;
 
 pub fn naive_algorithm(n: u64) -> UBig {
-    if n <= 1 {
+    if n < 2 {
         UBig::from(n)
     }
     else {
