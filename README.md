@@ -1,7 +1,7 @@
 # Fibonacci challenge
-The goal is to calculate the biggest possible Fibonacci number under one second and I decided to try it using Rust language. In this README will be described my journey through this challenge.
+The goal is to calculate the largest possible Fibonacci number in under one second, and I decided to try it using the Rust programming language. In this README, I will describe my journey through this challenge.
 
-For reminder Fibonacci number is defined by this formula:
+As a reminder, a Fibonacci number is defined by the following formula:
 ```math
 F_n = \begin{cases}
     F_{n-1} + F_{n-2}, & n \geq2 \\
@@ -11,7 +11,7 @@ F_n = \begin{cases}
 ```
 
 ## Dependencies
-You need **cargo** to run this project and if you want visualize measured results in graph you need to have **python** (tested on version 3.13.7) and install it's dependencies using this command:
+You need Cargo to run this project, and if you want to visualize the measured results in a graph, you need Python (tested with version 3.13.7) and must install its dependencies using the following command:
 ```bash
 pip install -r requirements.txt
 ```
@@ -21,7 +21,7 @@ To run measurements you simply use this command:
 ```bash
 cargo run --release
 ```
-And if you want to display measured data in graph you just run:
+And if you want to display the measured data in a graph, just run:
 ```bash
 python make_graphs.py
 ```
@@ -35,7 +35,7 @@ python make_graphs.py
 |           |            |                |
 
 ### Naive
-This algorithm is just rewritten formula in code using recursion.
+This algorithm is just a rewritten formula in code using recursion.
 
 ```python
 def naive(n):
@@ -45,7 +45,7 @@ def naive(n):
 ```
 
 ### Linear
-The iterative algorithm that just remember last two numbers, in every iteration process addition over them, forget smaller number and store new number. This algorithm should have linear complexity, but because of the addition over bigger and bigger numbers it has quadratic complexity.  
+The iterative algorithm remembers only the last two numbers. In each iteration, it adds them together, discards the smaller number, and stores the new one. This algorithm should have linear complexity, but because the additions involve increasingly larger numbers, it actually has quadratic complexity.  
 ```python
 def linear(n):
     a = 1
