@@ -10,20 +10,21 @@ use ibig::UBig;
 
 pub mod naive;
 pub mod linear;
+pub mod mat_exp;
 
 const MAX_TIME_IN_SEC: u64 = 1;
-const NUMB_OF_POINTS: u64 = 400;
-const LIMIT_FINDING_STEP: u64 = 8192;
+const NUMB_OF_POINTS: u64 = 500;
 
 fn find_limit(alg: Arc<dyn Fn(u64) + Send + Sync + 'static>) -> u64 {
     let mut last_idx = 0u64;
     let mut current_idx = 0u64;
-    let mut step = LIMIT_FINDING_STEP;
-    let limit = Duration::from_millis(MAX_TIME_IN_SEC*1000+100);
+    let mut step = 1u64;
+    let limit = Duration::from_millis(MAX_TIME_IN_SEC*1000+10);
 
+    let mut first_fail_flag = false;
     loop {
+        println!("idx: {}", current_idx);
         let (tx, rx) = mpsc::channel();
-
         let f = Arc::clone(&alg);
         thread::spawn(move || {
             f(current_idx);
@@ -33,8 +34,12 @@ fn find_limit(alg: Arc<dyn Fn(u64) + Send + Sync + 'static>) -> u64 {
         match rx.recv_timeout(limit) {
             Ok(_) => {
                 last_idx = current_idx;
+                if !first_fail_flag {
+                    step = step << 1;
+                }
             }
             Err(_) => {
+                first_fail_flag = true;
                 step /= 2;
                 current_idx = last_idx;
             }
@@ -77,13 +82,20 @@ fn measure_universal(name: &str, alg: &dyn Fn(u64) -> UBig, max_idx: u64) -> Res
 fn main() -> Result<()> {
     let f = Arc::new(|x| naive::naive_algorithm_limit(x));
     let lim_naive = find_limit(f);
+    println!("limit: {}", lim_naive);
 
     let f = Arc::new(|x| linear::linear_algorithm_limit(x));
     let lim_linear = find_limit(f);
+    println!("limit: {}", lim_linear);
+
+    let f = Arc::new(|x| mat_exp::matrix_exp_algorithm_limit(x));
+    let lim_exp_mat = find_limit(f);
+    println!("limit: {}", lim_exp_mat);
     
     let algorithms = vec![
         ("naive", lim_naive, &(naive::naive_algorithm as fn(u64) -> UBig)),
-        ("linear", lim_linear, &(linear::linear_algorithm as fn(u64) -> UBig))
+        ("linear", lim_linear, &(linear::linear_algorithm as fn(u64) -> UBig)),
+        ("exp_matrix", lim_exp_mat, &(mat_exp::matrix_exp_algorithm as fn(u64) -> UBig))
         ];
 
     for alg in algorithms {
