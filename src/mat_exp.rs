@@ -1,22 +1,22 @@
-use ibig::UBig;
+use rug::Integer;
 
-pub fn matrix_exp_algorithm(n: u64) -> UBig {
+pub fn matrix_exp_algorithm(n: u64) -> Integer {
     let mut res_mat = SymMat2x2{
-        a: UBig::from(1u32),
-        b: UBig::from(1u32),
-        c: UBig::from(0u32),
+        a: Integer::from(1u32),
+        b: Integer::from(1u32),
+        c: Integer::from(0u32),
     };
     let mul_mat = SymMat2x2{
-        a: UBig::from(1u32),
-        b: UBig::from(1u32),
-        c: UBig::from(0u32),
+        a: Integer::from(1u32),
+        b: Integer::from(1u32),
+        c: Integer::from(0u32),
     };
 
     if n < 2 {
-        return UBig::from(n);
+        return Integer::from(n);
     }
 
-    for _ in 0..n {
+    for _ in 0..(n-1) {
         res_mat.mul(&mul_mat);
     }
     res_mat.b
@@ -26,23 +26,23 @@ pub fn matrix_exp_algorithm_limit(n: u64) {
     let _ = matrix_exp_algorithm(n);
 }
 
+#[derive(Debug)]
 struct SymMat2x2 {
-    a: UBig,
-    b: UBig,
-    c: UBig
+    a: Integer,
+    b: Integer,
+    c: Integer
 }
 
 impl SymMat2x2 {
     pub fn mul(&mut self, mat: &SymMat2x2) {
-        let p1 = &self.a * &mat.a;
-        let p2 = &self.b * &mat.b;
-        let p3 = &self.c * &mat.c;
-        let p4 = (&self.a + &self.b) + (&mat.a + &mat.b);
-        let p5 = (&self.b + &self.c) + (&mat.b + &mat.c);
-        let p6 = (&self.a + &self.c) + (&mat.a + &mat.c);
+        let p1 = Integer::from(&self.a * &mat.a);
+        let p2 = Integer::from(&self.b * &mat.b);
+        let p3 = Integer::from(&self.c * &mat.c);
+        let p4 = Integer::from(&self.a * &mat.b);
+        let p5 = Integer::from(&self.b * &mat.c);
 
-        self.a = &p1 + &p2;
-        self.c = &p2 + &p3;
-        self.b = (&p4 + &p5 - &p6)/2;
+        self.a = Integer::from(&p1 + &p2);
+        self.b = Integer::from(&p5 + &p4);
+        self.c = Integer::from(&p2 + &p3);
     }
 }

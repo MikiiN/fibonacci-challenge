@@ -1,11 +1,11 @@
-use ibig::UBig;
+use rug::Integer;
 
-pub fn linear_algorithm(n: u64) -> UBig {
-    let mut a = UBig::from(1u32);
-    let mut b = UBig::from(0u32);
+pub fn linear_algorithm(n: u64) -> Integer {
+    let mut a = Integer::from(1u32);
+    let mut b = Integer::from(0u32);
 
     for _ in 0..n {
-        let tmp = &a + &b;
+        let tmp = Integer::from(&a + &b);
         b = a;
         a = tmp;
     }

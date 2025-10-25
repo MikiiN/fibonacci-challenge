@@ -6,7 +6,7 @@ use std::time::{Instant, Duration};
 use std::sync::mpsc;
 use std::thread;
 
-use ibig::UBig;
+use rug::Integer;
 
 pub mod naive;
 pub mod linear;
@@ -51,7 +51,7 @@ fn find_limit(alg: Arc<dyn Fn(u64) + Send + Sync + 'static>) -> u64 {
     }
 }
 
-fn measure_universal(name: &str, alg: &dyn Fn(u64) -> UBig, max_idx: u64) -> Result<()> {
+fn measure_universal(name: &str, alg: &dyn Fn(u64) -> Integer, max_idx: u64) -> Result<()> {
     let limit = Duration::from_secs(MAX_TIME_IN_SEC);
     fs::create_dir_all("data/")?;
     let mut file =  fs::File::create(format!("data/{}.out", name))?; 
@@ -93,9 +93,9 @@ fn main() -> Result<()> {
     println!("limit: {}", lim_exp_mat);
     
     let algorithms = vec![
-        ("naive", lim_naive, &(naive::naive_algorithm as fn(u64) -> UBig)),
-        ("linear", lim_linear, &(linear::linear_algorithm as fn(u64) -> UBig)),
-        ("exp_matrix", lim_exp_mat, &(mat_exp::matrix_exp_algorithm as fn(u64) -> UBig))
+        ("naive", lim_naive, &(naive::naive_algorithm as fn(u64) -> Integer)),
+        ("linear", lim_linear, &(linear::linear_algorithm as fn(u64) -> Integer)),
+        ("exp_matrix", lim_exp_mat, &(mat_exp::matrix_exp_algorithm as fn(u64) -> Integer))
         ];
 
     for alg in algorithms {

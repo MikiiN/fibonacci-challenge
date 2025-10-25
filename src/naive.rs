@@ -1,8 +1,8 @@
-use ibig::UBig;
+use rug::Integer;
 
-pub fn naive_algorithm(n: u64) -> UBig {
+pub fn naive_algorithm(n: u64) -> Integer {
     if n < 2 {
-        UBig::from(n)
+        Integer::from(n)
     }
     else {
         naive_algorithm(n-1) + naive_algorithm(n-2)
