@@ -16,10 +16,10 @@ pub fn matrix_exp_algorithm(n: u64) -> Integer {
         return Integer::from(n);
     }
 
-    for _ in 0..(n-1) {
+    for _ in 0..(n-2) {
         res_mat.mul(&mul_mat);
     }
-    res_mat.b
+    res_mat.a
 }
 
 pub fn matrix_exp_algorithm_limit(n: u64) {

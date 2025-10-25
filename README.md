@@ -28,11 +28,12 @@ python make_graphs.py
 
 ## Implemented Algorithms
 
-| Algorithm | Complexity | Location       |
-|-----------|------------|----------------|
-|   naive   | $`O(2^n)`$ |`naive.rs`      |
-|  linear   | $`O(n^2)`$ |`linear.rs`     |
-|           |            |                |
+| Algorithm             | Complexity | Location       |
+|-----------------------|------------|----------------|
+|   naive               | $`O(2^n)`$ |`naive.rs`      |
+|  linear               | $`O(n^2)`$ |`linear.rs`     |
+| matrix exponentiation | $`O(n^2)`$ |`mat_exp.rs`    |
+<!-- |                       |            |                | -->
 
 ### Naive
 This algorithm is just a rewritten formula in code using recursion.
@@ -55,4 +56,59 @@ def linear(n):
         b = a
         a = tmp
     return b
+```
+
+### Matrix exponentiation
+This algorithm is based on the following identity:
+```math
+\begin{bmatrix}
+    1 & 1 \\ 1 & 0
+\end{bmatrix}^n =
+\begin{bmatrix}
+    F_{n+1} & F_n \\ F_n & F_{n-1}
+\end{bmatrix}
+```
+Because the matrices involved are always symmetric, the calculation can be simplified by using only three elements of each matrix.
+Starting from the formula:
+
+```math 
+\begin{bmatrix} a & b \\ b & c \end{bmatrix} * \begin{bmatrix} d & e \\ e & f \end{bmatrix} = \begin{bmatrix} ad+be & ae+bf \\ ae+bf & be+cf \end{bmatrix}
+```
+
+we can represent each symmetric matrix using only three components:
+```math
+\begin{bmatrix}
+    a \\ b \\ c
+\end{bmatrix}
+```
+
+and rewrite the multiplication as a special operation between these 3-element vectors:
+
+ ```math
+\begin{bmatrix}
+    a \\ b \\ c
+\end{bmatrix} \cdot
+\begin{bmatrix}
+    d \\ e \\ f
+\end{bmatrix}  =
+\begin{bmatrix}
+    ad+be \\ ae+bf \\ be+cf
+\end{bmatrix}
+```
+Note: \
+The operation $`\cdot`$ here does not represent ordinary scalar or matrix multiplication.
+It is a custom-defined operation that mimics the effect of multiplying two symmetric 2×2 matrices.
+
+In the end, the algorithm performs iterative matrix multiplications between the result matrix and the base matrix.
+To save one matrix multiplication, the result is stored in the first matrix element.
+
+```python
+def matrix_exponentiation(n):
+    result = Matrix()
+    base = Matrix()
+    if n < 2:
+        return n
+    for _ in range(n-2):
+        result = result * base
+    return result[0][0]
 ```
