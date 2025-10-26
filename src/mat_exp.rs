@@ -35,14 +35,13 @@ struct SymMat2x2 {
 
 impl SymMat2x2 {
     pub fn mul(&mut self, mat: &SymMat2x2) {
-        let p1 = Integer::from(&self.a * &mat.a);
         let p2 = Integer::from(&self.b * &mat.b);
         let p3 = Integer::from(&self.c * &mat.c);
         let p4 = Integer::from(&self.a * &mat.b);
         let p5 = Integer::from(&self.b * &mat.c);
 
-        self.a = Integer::from(&p1 + &p2);
-        self.b = Integer::from(&p5 + &p4);
-        self.c = Integer::from(&p2 + &p3);
+        self.a = Integer::from(&self.c + &self.b);
+        self.b = p5 + p4;
+        self.c = p2 + p3;
     }
 }

@@ -11,9 +11,10 @@ use rug::Integer;
 pub mod naive;
 pub mod linear;
 pub mod mat_exp;
+pub mod r_mat_exp;
 
 const MAX_TIME_IN_SEC: u64 = 1;
-const NUMB_OF_POINTS: u64 = 500;
+const NUMB_OF_POINTS: u64 = 400;
 
 fn find_limit(alg: Arc<dyn Fn(u64) + Send + Sync + 'static>) -> u64 {
     let mut last_idx = 0u64;
@@ -39,8 +40,11 @@ fn find_limit(alg: Arc<dyn Fn(u64) + Send + Sync + 'static>) -> u64 {
                 }
             }
             Err(_) => {
+                if !first_fail_flag {
+                    step = step >> 1;
+                }
                 first_fail_flag = true;
-                step /= 2;
+                step = step >> 1;
                 current_idx = last_idx;
             }
         }
@@ -80,10 +84,16 @@ fn measure_universal(name: &str, alg: &dyn Fn(u64) -> Integer, max_idx: u64) -> 
 }
 
 fn main() -> Result<()> {
+    // for n in 0..10 {
+    //     let res = r_mat_exp::reduced_matrix_exp_algorithm(n);
+    //     let corr = linear::linear_algorithm(n);
+    //     println!("{}: {} {}", n, res, corr);
+    // }
+    
     let f = Arc::new(|x| naive::naive_algorithm_limit(x));
     let lim_naive = find_limit(f);
     println!("limit: {}", lim_naive);
-
+    
     let f = Arc::new(|x| linear::linear_algorithm_limit(x));
     let lim_linear = find_limit(f);
     println!("limit: {}", lim_linear);
@@ -92,10 +102,16 @@ fn main() -> Result<()> {
     let lim_exp_mat = find_limit(f);
     println!("limit: {}", lim_exp_mat);
     
+    let f = Arc::new(|x| r_mat_exp::reduced_matrix_exp_algorithm_limit(x));
+    let lim_r_exp_mat = find_limit(f);
+    println!("limit: {}", lim_r_exp_mat);
+    
+
     let algorithms = vec![
         ("naive", lim_naive, &(naive::naive_algorithm as fn(u64) -> Integer)),
         ("linear", lim_linear, &(linear::linear_algorithm as fn(u64) -> Integer)),
-        ("exp_matrix", lim_exp_mat, &(mat_exp::matrix_exp_algorithm as fn(u64) -> Integer))
+        ("exp_matrix", lim_exp_mat, &(mat_exp::matrix_exp_algorithm as fn(u64) -> Integer)),
+        ("reduced_exp_matrix", lim_exp_mat, &(r_mat_exp::reduced_matrix_exp_algorithm as fn(u64) -> Integer)),
         ];
 
     for alg in algorithms {
