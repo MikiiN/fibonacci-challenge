@@ -32,7 +32,7 @@ python make_graphs.py
 |-----------------------|------------|----------------|
 |   naive               | $`O(2^n)`$ |`naive.rs`      |
 |  linear               | $`O(n^2)`$ |`linear.rs`     |
-| matrix exponentiation | $`O(n^2)`$ |`mat_exp.rs`    |
+| matrix exponentiation | $`O(log(n))`$ |`mat_exp.rs`    |
 <!-- |                       |            |                | -->
 
 ### Naive
@@ -97,10 +97,9 @@ and rewrite the multiplication as a special operation between these 3-element ve
 ```
 Note: \
 The operation $`\cdot`$ here does not represent ordinary scalar or matrix multiplication.
-It is a custom-defined operation that mimics the effect of multiplying two symmetric 2×2 matrices.
+It is a custom-defined operation that mimics the effect of multiplying two symmetric 2×2 matrices in this specific use case.
 
-In the end, the algorithm performs iterative matrix multiplications between the result matrix and the base matrix.
-To save one matrix multiplication, the result is stored in the first matrix element.
+In the end, the algorithm performs iterative matrix multiplications between the result matrix and the base matrix depending on current bit in the given index.
 
 ```python
 def matrix_exponentiation(n):
@@ -108,7 +107,9 @@ def matrix_exponentiation(n):
     base = Matrix()
     if n < 2:
         return n
-    for _ in range(n-2):
-        result = result * base
-    return result[0][0]
+    while n > 0:
+        if (n & 1) == 1:
+            result = result * base
+        base = base * base
+    return result[0][1]
 ```
