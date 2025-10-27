@@ -5,7 +5,7 @@ pub fn reduced_matrix_exp_algorithm(n: u64) -> Integer {
         a: Integer::from(0u32),
         b: Integer::from(1u32),
     };
-    let mul_mat = SymMat2x2{
+    let mut mul_mat = SymMat2x2{
         a: Integer::from(0u32),
         b: Integer::from(1u32),
     };
@@ -14,9 +14,15 @@ pub fn reduced_matrix_exp_algorithm(n: u64) -> Integer {
         return Integer::from(n);
     }
 
-    for _ in 0..(n-2) {
-        res_mat.mul(&mul_mat);
-    }
+    let mut i = n-2;
+    while i > 0 {
+        let last_bit = i & 1;
+        if last_bit == 1 {
+            res_mat.mul(&mul_mat);
+        }
+        mul_mat.square();
+        i = i >> 1;
+    } 
     res_mat.a + res_mat.b
 }
 
@@ -34,9 +40,19 @@ impl SymMat2x2 {
     pub fn mul(&mut self, mat: &SymMat2x2) {
         let p1 = Integer::from(&self.a * &mat.a);
         let p2 = Integer::from(&self.b * &mat.b);
-        let p3 = Integer::from(&self.b * &mat.a) + Integer::from(&self.a * &mat.b);
+        let p3 = Integer::from(&self.a * &mat.b) + Integer::from(&self.b * &mat.a);
 
-        self.a = p1 + Integer::from(&p2);
-        self.b = Integer::from(&p2) + p3;
+        self.a = Integer::from(&p1 + &p2);
+        self.b = Integer::from(&p2 + &p3);
+    }
+
+    pub fn square(&mut self) {
+        let p1 = Integer::from(&self.a * &self.a);
+        let p2 = Integer::from(&self.b * &self.b);
+        let p3 = Integer::from(&self.a * &self.b);
+        let p4 = Integer::from(&p3 + &p3);
+
+        self.a = Integer::from(&p1 + &p2);
+        self.b = Integer::from(&p2 + &p4);
     }
 }

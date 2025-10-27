@@ -14,7 +14,7 @@ pub mod mat_exp;
 pub mod r_mat_exp;
 
 const MAX_TIME_IN_SEC: u64 = 1;
-const NUMB_OF_POINTS: u64 = 400;
+const NUMB_OF_POINTS: u64 = 200;
 
 fn find_limit(alg: Arc<dyn Fn(u64) + Send + Sync + 'static>) -> u64 {
     let mut last_idx = 0u64;
