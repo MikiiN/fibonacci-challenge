@@ -32,7 +32,7 @@ python make_graphs.py
 |-----------------------|------------|----------------|
 |   naive               | $`O(2^n)`$ |`naive.rs`      |
 |  linear               | $`O(n^2)`$ |`linear.rs`     |
-| matrix exponentiation | $`O(log(n))`$ |`mat_exp.rs`    |
+| fast exponentiation | $`O(log(n))`$ |`mat_exp.rs`    |
 <!-- |                       |            |                | -->
 
 ### Naive

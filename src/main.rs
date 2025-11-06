@@ -12,6 +12,7 @@ pub mod naive;
 pub mod linear;
 pub mod mat_exp;
 pub mod r_mat_exp;
+pub mod reversed_mat_exp;
 
 const MAX_TIME_IN_SEC: u64 = 1;
 const NUMB_OF_POINTS: u64 = 200;
@@ -84,9 +85,13 @@ fn measure_universal(name: &str, alg: &dyn Fn(u64) -> Integer, max_idx: u64) -> 
 }
 
 fn main() -> Result<()> {
-    // for n in 0..10 {
+    // for n in 0..100 {
     //     let res = r_mat_exp::reduced_matrix_exp_algorithm(n);
     //     let corr = linear::linear_algorithm(n);
+    //     if res != corr {
+    //         println!("Mistake");
+    //         break;
+    //     }
     //     println!("{}: {} {}", n, res, corr);
     // }
     
@@ -105,13 +110,17 @@ fn main() -> Result<()> {
     let f = Arc::new(|x| r_mat_exp::reduced_matrix_exp_algorithm_limit(x));
     let lim_r_exp_mat = find_limit(f);
     println!("limit: {}", lim_r_exp_mat);
-    
+
+    let f = Arc::new(|x| reversed_mat_exp::reversed_matrix_exp_algorithm_limit(x));
+    let lim_reversed_exp_mat = find_limit(f);
+    println!("limit: {}", lim_reversed_exp_mat);
 
     let algorithms = vec![
         ("naive", lim_naive, &(naive::naive_algorithm as fn(u64) -> Integer)),
         ("linear", lim_linear, &(linear::linear_algorithm as fn(u64) -> Integer)),
         ("exp_matrix", lim_exp_mat, &(mat_exp::matrix_exp_algorithm as fn(u64) -> Integer)),
         ("reduced_exp_matrix", lim_exp_mat, &(r_mat_exp::reduced_matrix_exp_algorithm as fn(u64) -> Integer)),
+        ("reversed_exp_matrix", lim_reversed_exp_mat, &(reversed_mat_exp::reversed_matrix_exp_algorithm as fn(u64) -> Integer)),
         ];
 
     for alg in algorithms {
