@@ -1,14 +1,31 @@
 use rug::Integer;
 
-pub fn naive_algorithm(n: u64) -> Integer {
-    if n < 2 {
-        Integer::from(n)
-    }
-    else {
-        naive_algorithm(n-1) + naive_algorithm(n-2)
+use super::algorithm::Algorithm;
+
+#[derive(Clone)]
+pub struct Naive {
+    name: String,
+}
+
+impl Naive {
+    pub fn new() -> Naive {
+        Naive { 
+            name: String::from("naive"),
+        }
     }
 }
 
-pub fn naive_algorithm_limit(n: u64) {
-    let _ = naive_algorithm(n);
+impl Algorithm for Naive {
+    fn fibonacci(&self, n: u64) -> Integer {
+        if n < 2 {
+        Integer::from(n)
+        }
+        else {
+            self.fibonacci(n-1) + self.fibonacci(n-2)
+        }
+    }
+
+    fn get_name(&self) -> &str {
+        self.name.as_str()
+    }
 }

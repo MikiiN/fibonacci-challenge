@@ -1,35 +1,49 @@
 use rug::Integer;
+use super::algorithm::Algorithm;
 
-pub fn matrix_exp_algorithm(n: u64) -> Integer {
-    let mut res_mat = SymMat2x2{
-        a: Integer::from(1u32),
-        b: Integer::from(1u32),
-        c: Integer::from(0u32),
-    };
-    let mut mul_mat = SymMat2x2{
-        a: Integer::from(1u32),
-        b: Integer::from(1u32),
-        c: Integer::from(0u32),
-    };
-
-    if n < 2 {
-        return Integer::from(n);
-    }
-
-    let mut i = n-1;
-    while i > 0 {
-        let last_bit = i & 1;
-        if last_bit == 1 {
-            res_mat.mul(&mul_mat);
-        }
-        mul_mat.square();
-        i = i >> 1;
-    } 
-    res_mat.b
+#[derive(Clone)]
+pub struct ExponentialMatrix {
+    name: String
 }
 
-pub fn matrix_exp_algorithm_limit(n: u64) {
-    let _ = matrix_exp_algorithm(n);
+impl ExponentialMatrix {
+    pub fn new() -> ExponentialMatrix {
+        ExponentialMatrix { name: String::from("Exponential Matrix") }
+    }
+}
+
+impl Algorithm for ExponentialMatrix {
+    fn fibonacci(&self, n: u64) -> Integer {
+        let mut res_mat = SymMat2x2{
+            a: Integer::from(1u32),
+            b: Integer::from(1u32),
+            c: Integer::from(0u32),
+        };
+        let mut mul_mat = SymMat2x2{
+            a: Integer::from(1u32),
+            b: Integer::from(1u32),
+            c: Integer::from(0u32),
+        };
+
+        if n < 2 {
+            return Integer::from(n);
+        }
+
+        let mut i = n-1;
+        while i > 0 {
+            let last_bit = i & 1;
+            if last_bit == 1 {
+                res_mat.mul(&mul_mat);
+            }
+            mul_mat.square();
+            i = i >> 1;
+        } 
+        res_mat.b
+    }
+
+    fn get_name(&self) -> &str {
+        self.name.as_str()
+    }
 }
 
 #[derive(Debug)]

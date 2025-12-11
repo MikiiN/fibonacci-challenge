@@ -1,12 +1,14 @@
 use std::cmp;
-use std::sync::Arc;
 use std::fs;
 use std::io::{Write, Result};
+use std::process::exit;
 use std::time::{Instant, Duration};
 use std::sync::mpsc;
 use std::thread;
 
-use rug::Integer;
+use crate::algorithm::Algorithm;
+
+pub mod algorithm;
 
 pub mod naive;
 pub mod linear;
@@ -14,10 +16,15 @@ pub mod mat_exp;
 pub mod r_mat_exp;
 pub mod reversed_mat_exp;
 
+
 const MAX_TIME_IN_SEC: u64 = 1;
 const NUMB_OF_POINTS: u64 = 200;
 
-fn find_limit(alg: Arc<dyn Fn(u64) + Send + Sync + 'static>) -> u64 {
+
+fn find_limit<T>(alg: &T, print_indexes: bool) -> u64
+where 
+    T: Algorithm + Clone + Send + 'static
+{
     let mut last_idx = 0u64;
     let mut current_idx = 0u64;
     let mut step = 1u64;
@@ -25,11 +32,13 @@ fn find_limit(alg: Arc<dyn Fn(u64) + Send + Sync + 'static>) -> u64 {
 
     let mut first_fail_flag = false;
     loop {
-        println!("idx: {}", current_idx);
+        if print_indexes {
+            println!("idx: {}", current_idx);
+        }
         let (tx, rx) = mpsc::channel();
-        let f = Arc::clone(&alg);
+        let alg_clone = alg.clone();
         thread::spawn(move || {
-            f(current_idx);
+            alg_clone.fibonacci_measure(current_idx);
             let _ = tx.send(current_idx);
         });
 
@@ -52,13 +61,20 @@ fn find_limit(alg: Arc<dyn Fn(u64) + Send + Sync + 'static>) -> u64 {
         if step == 0 {
             return current_idx;
         }
-        current_idx += step;
+        current_idx += step;    
     }
 }
 
-fn measure_universal(name: &str, alg: &dyn Fn(u64) -> Integer, max_idx: u64) -> Result<()> {
+fn measure_universal<T>(alg: T, print_indexes: bool) -> Result<()>  
+where 
+    T: Algorithm + Clone + Send + 'static
+{
     let limit = Duration::from_secs(MAX_TIME_IN_SEC);
+    let max_idx = find_limit(&alg, print_indexes);
+    println!("limit for {}: {}", alg.get_name(), max_idx);
+
     fs::create_dir_all("data/")?;
+    let name = alg.get_name();
     let mut file =  fs::File::create(format!("data/{}.out", name))?; 
 
     let step = cmp::max(1, max_idx / NUMB_OF_POINTS);
@@ -66,7 +82,7 @@ fn measure_universal(name: &str, alg: &dyn Fn(u64) -> Integer, max_idx: u64) -> 
     let mut i = 0u64; 
     loop {
         let begin = Instant::now();
-        let _ = alg(i);
+        let _ = alg.fibonacci(i);
         let duration = begin.elapsed();
         if duration >= limit {
             break;
@@ -84,47 +100,53 @@ fn measure_universal(name: &str, alg: &dyn Fn(u64) -> Integer, max_idx: u64) -> 
     Ok(())
 }
 
-fn main() -> Result<()> {
+fn main() {
+    // code for validity testing
+    // let alg_corr = linear::Linear::new();
+    // let alg_test = reversed_mat_exp::ReversedExponentialMatrix::new();
     // for n in 0..100 {
-    //     let res = r_mat_exp::reduced_matrix_exp_algorithm(n);
-    //     let corr = linear::linear_algorithm(n);
+    //     let res = alg_test.fibonacci(n);
+    //     let corr = alg_corr.fibonacci(n);
+    //     println!("{}: {} {}", n, res, corr);
     //     if res != corr {
     //         println!("Mistake");
     //         break;
     //     }
-    //     println!("{}: {} {}", n, res, corr);
     // }
+    // exit(0);
     
-    let f = Arc::new(|x| naive::naive_algorithm_limit(x));
-    let lim_naive = find_limit(f);
-    println!("limit: {}", lim_naive);
-    
-    let f = Arc::new(|x| linear::linear_algorithm_limit(x));
-    let lim_linear = find_limit(f);
-    println!("limit: {}", lim_linear);
-
-    let f = Arc::new(|x| mat_exp::matrix_exp_algorithm_limit(x));
-    let lim_exp_mat = find_limit(f);
-    println!("limit: {}", lim_exp_mat);
-    
-    let f = Arc::new(|x| r_mat_exp::reduced_matrix_exp_algorithm_limit(x));
-    let lim_r_exp_mat = find_limit(f);
-    println!("limit: {}", lim_r_exp_mat);
-
-    let f = Arc::new(|x| reversed_mat_exp::reversed_matrix_exp_algorithm_limit(x));
-    let lim_reversed_exp_mat = find_limit(f);
-    println!("limit: {}", lim_reversed_exp_mat);
-
-    let algorithms = vec![
-        ("naive", lim_naive, &(naive::naive_algorithm as fn(u64) -> Integer)),
-        ("linear", lim_linear, &(linear::linear_algorithm as fn(u64) -> Integer)),
-        ("exp_matrix", lim_exp_mat, &(mat_exp::matrix_exp_algorithm as fn(u64) -> Integer)),
-        ("reduced_exp_matrix", lim_exp_mat, &(r_mat_exp::reduced_matrix_exp_algorithm as fn(u64) -> Integer)),
-        ("reversed_exp_matrix", lim_reversed_exp_mat, &(reversed_mat_exp::reversed_matrix_exp_algorithm as fn(u64) -> Integer)),
-        ];
-
-    for alg in algorithms {
-        measure_universal(alg.0, alg.2, alg.1)?;
+    let alg_naive = naive::Naive::new();
+    let err = measure_universal(alg_naive, false);
+    match err {
+        Ok(v) => v,
+        Err(_) => {println!("Error occurred"); exit(1)},
     }
-    Ok(())
+
+    let alg_linear = linear::Linear::new();
+    let _ = measure_universal(alg_linear, false);
+    match err {
+        Ok(v) => v,
+        Err(_) => {println!("Error occurred"); exit(1)},
+    }
+
+    let alg_exp_mat = mat_exp::ExponentialMatrix::new();
+    let err = measure_universal(alg_exp_mat, false);
+    match err {
+        Ok(v) => v,
+        Err(_) => {println!("Error occurred"); exit(1)},
+    }
+
+    let alg_reduced_exp_mat = r_mat_exp::ReducedExponentialMatrix::new();
+    let err = measure_universal(alg_reduced_exp_mat, false);
+    match err {
+        Ok(v) => v,
+        Err(_) => {println!("Error occurred"); exit(1)},
+    }
+
+    let alg_reversed_exp_mat = reversed_mat_exp::ReversedExponentialMatrix::new();
+    let err = measure_universal(alg_reversed_exp_mat, false);
+    match err {
+        Ok(v) => v,
+        Err(_) => {println!("Error occurred"); exit(1)},
+    }
 }

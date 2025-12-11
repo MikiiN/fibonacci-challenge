@@ -1,33 +1,49 @@
 use rug::Integer;
+use super::algorithm::Algorithm;
 
-pub fn reduced_matrix_exp_algorithm(n: u64) -> Integer {
-    let mut res_mat = SymMat2x2{
-        a: Integer::from(0u32),
-        b: Integer::from(1u32),
-    };
-    let mut mul_mat = SymMat2x2{
-        a: Integer::from(0u32),
-        b: Integer::from(1u32),
-    };
-
-    if n < 2 {
-        return Integer::from(n);
-    }
-
-    let mut i = n-2;
-    while i > 0 {
-        let last_bit = i & 1;
-        if last_bit == 1 {
-            res_mat.mul(&mul_mat);
-        }
-        mul_mat.square();
-        i = i >> 1;
-    } 
-    res_mat.a + res_mat.b
+#[derive(Clone)]
+pub struct ReducedExponentialMatrix {
+    name: String
 }
 
-pub fn reduced_matrix_exp_algorithm_limit(n: u64) {
-    let _ = reduced_matrix_exp_algorithm(n);
+impl ReducedExponentialMatrix {
+    pub fn new() -> ReducedExponentialMatrix {
+        ReducedExponentialMatrix { 
+            name: String::from("Reduced Exponential Matrix") 
+        }
+    }
+}
+
+impl Algorithm for ReducedExponentialMatrix {
+    fn fibonacci(&self, n: u64) -> Integer {
+        let mut res_mat = SymMat2x2{
+            a: Integer::from(0u32),
+            b: Integer::from(1u32),
+        };
+        let mut mul_mat = SymMat2x2{
+            a: Integer::from(0u32),
+            b: Integer::from(1u32),
+        };
+
+        if n < 2 {
+            return Integer::from(n);
+        }
+
+        let mut i = n-2;
+        while i > 0 {
+            let last_bit = i & 1;
+            if last_bit == 1 {
+                res_mat.mul(&mul_mat);
+            }
+            mul_mat.square();
+            i = i >> 1;
+        } 
+        res_mat.a + res_mat.b
+    }
+
+    fn get_name(&self) -> &str {
+        self.name.as_str()
+    }
 }
 
 #[derive(Debug)]
