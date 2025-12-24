@@ -15,6 +15,7 @@ pub mod linear;
 pub mod mat_exp;
 pub mod r_mat_exp;
 pub mod reversed_mat_exp;
+pub mod fast_doubling;
 
 
 const MAX_TIME_IN_SEC: u64 = 1;
@@ -103,7 +104,7 @@ where
 fn main() {
     // code for validity testing
     // let alg_corr = linear::Linear::new();
-    // let alg_test = reversed_mat_exp::ReversedExponentialMatrix::new();
+    // let alg_test = fast_doubling::FastDoubling::new();
     // for n in 0..100 {
     //     let res = alg_test.fibonacci(n);
     //     let corr = alg_corr.fibonacci(n);
@@ -145,6 +146,13 @@ fn main() {
 
     let alg_reversed_exp_mat = reversed_mat_exp::ReversedExponentialMatrix::new();
     let err = measure_universal(alg_reversed_exp_mat, false);
+    match err {
+        Ok(v) => v,
+        Err(_) => {println!("Error occurred"); exit(1)},
+    }
+
+    let alg_fast_doubling = fast_doubling::FastDoubling::new();
+    let err = measure_universal(alg_fast_doubling, false);
     match err {
         Ok(v) => v,
         Err(_) => {println!("Error occurred"); exit(1)},
