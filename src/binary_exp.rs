@@ -2,19 +2,19 @@ use rug::Integer;
 use super::algorithm::Algorithm;
 
 #[derive(Clone)]
-pub struct ReversedExponentialMatrix {
+pub struct BinaryExponentiationMatrix {
     name: String
 }
 
-impl ReversedExponentialMatrix {
-    pub fn new() -> ReversedExponentialMatrix {
-        ReversedExponentialMatrix { 
+impl BinaryExponentiationMatrix {
+    pub fn new() -> BinaryExponentiationMatrix {
+        BinaryExponentiationMatrix { 
             name: String::from("Reversed Exponential Matrix") 
         }
     }
 }
 
-impl Algorithm for ReversedExponentialMatrix {
+impl Algorithm for BinaryExponentiationMatrix {
     fn fibonacci(&self, n: u64) -> Integer {
         let mut res_mat = SymMat2x2{
             a: Integer::from(1u32),

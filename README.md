@@ -28,11 +28,14 @@ python make_graphs.py
 
 ## Implemented Algorithms
 
-| Algorithm             | Complexity | Location       |
+| Algorithm             | Time Complexity | Location       |
 |-----------------------|------------|----------------|
 |   naive               | $`O(2^n)`$ |`naive.rs`      |
 |  linear               | $`O(n^2)`$ |`linear.rs`     |
-| fast exponentiation | $`O(log(n))`$ |`mat_exp.rs`    |
+| matrix exponentiation | $`O(n^2)`$ |`mat_exp.rs`    |
+| reduced matrix exp.   | $`O(n^2)`$ |`r_mat_exp.rs`    |
+| binary exponentiation | $`O(log(n))`$ |`binary_exp.rs`    |
+| fast doubling         | $`O(log(n))`$ | `fast_doubling.rs` |
 <!-- |                       |            |                | -->
 
 ### Naive
@@ -112,4 +115,98 @@ def matrix_exponentiation(n):
             result = result * base
         base = base * base
     return result[0][1]
+```
+
+
+### Reduced matrix exponentiation
+Because of the relation between numbers in vector we can reduce it's size to only a two elements.
+```math
+\begin{bmatrix}
+    F_{n} \\ F_{n+1}
+\end{bmatrix}
+```
+With this adjustment the algorithm stay the same, but we need to modify operations for a matrix multiplication and a square. First we calculate intermediate results which will be used to get results.
+
+#### Multiplication:
+```math
+\begin{bmatrix}
+    a_0 \\ b_0
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+    a_1 \\ b_1
+\end{bmatrix}
+=
+\begin{bmatrix}
+    p_1 + p_2 \\ p_2 + p_3
+\end{bmatrix}
+```
+where
+```math
+p_1 = a_0 \cdot a_1 \\
+p_2 = b_0 \cdot b_0 \\
+p_2 = a_0 \cdot b_1 + b_0 \cdot a_1
+```
+#### Square
+```math
+\begin{bmatrix}
+    a \\ b
+\end{bmatrix}
+^2
+=
+\begin{bmatrix}
+    p_1 + p_2 \\ p_2 + p_4
+\end{bmatrix}
+```
+where
+```math
+p_1 = a \cdot a \\
+p_2 = b \cdot b \\
+p_3 = a \cdot b \\
+p_4 = p_3 + p_3
+```
+
+### Binary exponentiation
+This algorithm is still a variant of a Matrix exponentiation, but instead of using naive multiplication we split the work using the binary representation of exponent. This will result to using only $`O(log(n))`$ multiplications. 
+```python
+def binary_exponentiation(n):
+    result = Matrix()
+    base = Matrix()
+    if n < 2:
+        return n
+    while n > 1:
+        if (n % 2) == 1:
+            base = base * result
+            n -= 1
+        result = result * result
+        n = n >> 1
+    result = result * result
+    return result[0][2]
+```
+
+
+### Fast doubling
+The Fast doubling use information that just by using $`F_n`$ and $`F_{n+1}`$ we can calculate $`F_{2n}`$. For this it use these two formulas:
+```math
+F_{2n} = F_n \cdot (2F_{n+1} - F_n) \\
+F_{2n+1} = F_{n+1}^2 + F_n^2
+```
+This allow us to double position in sequence by smaller number of multiplications.
+
+```python
+def fast_doubling(n)
+    if n == 0:
+        return 0, 1
+    new_n = n / 2 
+    a, b = fast_doubling(new_n)
+    a2 = a * a
+    b2 = b * b
+    c = 2*b - a
+    c = a * c
+    d = a2 + b2
+
+    if n % 2 == 0:
+        return c, d
+    else:
+        return d, c+d 
 ```

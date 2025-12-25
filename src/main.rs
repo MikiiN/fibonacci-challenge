@@ -14,7 +14,7 @@ pub mod naive;
 pub mod linear;
 pub mod mat_exp;
 pub mod r_mat_exp;
-pub mod reversed_mat_exp;
+pub mod binary_exp;
 pub mod fast_doubling;
 
 
@@ -104,7 +104,7 @@ where
 fn main() {
     // code for validity testing
     // let alg_corr = linear::Linear::new();
-    // let alg_test = fast_doubling::FastDoubling::new();
+    // let alg_test = reversed_mat_exp::ReversedExponentialMatrix::new();
     // for n in 0..100 {
     //     let res = alg_test.fibonacci(n);
     //     let corr = alg_corr.fibonacci(n);
@@ -130,21 +130,21 @@ fn main() {
         Err(_) => {println!("Error occurred"); exit(1)},
     }
 
-    let alg_exp_mat = mat_exp::ExponentialMatrix::new();
+    let alg_exp_mat = mat_exp::ExponentiationMatrix::new();
     let err = measure_universal(alg_exp_mat, false);
     match err {
         Ok(v) => v,
         Err(_) => {println!("Error occurred"); exit(1)},
     }
 
-    let alg_reduced_exp_mat = r_mat_exp::ReducedExponentialMatrix::new();
+    let alg_reduced_exp_mat = r_mat_exp::ReducedExponentiationMatrix::new();
     let err = measure_universal(alg_reduced_exp_mat, false);
     match err {
         Ok(v) => v,
         Err(_) => {println!("Error occurred"); exit(1)},
     }
 
-    let alg_reversed_exp_mat = reversed_mat_exp::ReversedExponentialMatrix::new();
+    let alg_reversed_exp_mat = binary_exp::BinaryExponentiationMatrix::new();
     let err = measure_universal(alg_reversed_exp_mat, false);
     match err {
         Ok(v) => v,

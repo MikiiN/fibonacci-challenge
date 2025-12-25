@@ -2,17 +2,17 @@ use rug::Integer;
 use super::algorithm::Algorithm;
 
 #[derive(Clone)]
-pub struct ExponentialMatrix {
+pub struct ExponentiationMatrix {
     name: String
 }
 
-impl ExponentialMatrix {
-    pub fn new() -> ExponentialMatrix {
-        ExponentialMatrix { name: String::from("Exponential Matrix") }
+impl ExponentiationMatrix {
+    pub fn new() -> ExponentiationMatrix {
+        ExponentiationMatrix { name: String::from("Exponential Matrix") }
     }
 }
 
-impl Algorithm for ExponentialMatrix {
+impl Algorithm for ExponentiationMatrix {
     fn fibonacci(&self, n: u64) -> Integer {
         let mut res_mat = SymMat2x2{
             a: Integer::from(1u32),
